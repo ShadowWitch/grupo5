@@ -1,0 +1,74 @@
+version: '3.8'
+services:
+  backend:
+    build:
+      context: backend/.
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=development
+    volumes:
+      - ./backend:/app
+    ports:
+      - "3000:3000"
+
+  frontend:
+    build:
+      context: frontend/.
+      dockerfile: Dockerfile
+      args:
+        - NODE_ENV=development
+    volumes:
+      - ./frontend:/app
+    ports:
+      - "3001:3000"
+    depends_on:
+      - backend
+
+  reverse-proxy:
+    image: nginx:latest
+    ports:
+      - "80:80"
+    volumes:
+      - ./nginx.conf:/etc/nginx/nginx.conf
+      - ./html:/usr/share/nginx/html
+    depends_on:
+      - backend
+
+  redis-cache:
+    image: redis:7.0-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  redis-rate-limit:
+    image: redis:7.0-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - ./redis.conf:/usr/local/etc/redis/redis.conf
+    command: redis-server /usr/local/etc/redis/redis.conf
+
+  postgres-db:
+    image: postgres:latest
+    ports:
+      - "5432:5432"
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=postgres
+    volumes:
+      - ./postgres-data:/var/lib/postgresql/data
+
+  mysql-db:
+    image: mysql:8.0.33
+    ports:
+      - "3306:3306"
+    environment:
+      - MYSQL_ROOT_PASSWORD=root
+      - MYSQL_DATABASE=app
+      - MYSQL_USER=app
+      - MYSQL_PASSWORD=app
+    volumes:
+      - ./mysql-data:/var/lib/mysql

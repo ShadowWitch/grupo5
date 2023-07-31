@@ -1,0 +1,7 @@
+{
+  "scripts": {
+    "start:dev": "(cd backend && pnpm dev) & (cd frontend && pnpm dev)",
+    "build": "(cd backend && pnpm build) & (cd frontend && pnpm build)",
+    "start": "(cd backend && pnpm start) & (cd frontend && pnpm start)"
+  }
+}
